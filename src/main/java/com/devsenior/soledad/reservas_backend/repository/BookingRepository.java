@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 
 /**
@@ -20,4 +21,11 @@ public interface BookingRepository extends JpaRepository<Booking,Long> {
      * @return true if a booking exists at the given date and time, false otherwise
      */
     boolean existsByDateAndTime(LocalDate date, LocalTime time);
+
+    // Multi-tenant methods
+    List<Booking> findByCompany_Id(Long companyId);
+
+    boolean existsByCompany_IdAndDateAndTime(Long companyId, LocalDate date, LocalTime time);
+
+    java.util.Optional<Booking> findByIdAndCompany_Id(Long id, Long companyId);
 }

@@ -38,5 +38,9 @@ public class Booking {
     @Column(name = "status", nullable = false)
     private BookingStatus status;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id", nullable = false)
+    private Company company;
+
 
 }

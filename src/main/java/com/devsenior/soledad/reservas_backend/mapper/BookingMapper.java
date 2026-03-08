@@ -42,7 +42,8 @@ public class BookingMapper {
                 booking.getDate(),
                 booking.getTime(),
                 booking.getService(),
-                booking.getStatus()
+                booking.getStatus(),
+                booking.getCompany().getName()
         );
     }
 }

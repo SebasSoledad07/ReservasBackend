@@ -13,7 +13,7 @@ import java.time.LocalTime;
  * @param time booking time
  * @param serviceName service name
  * @param status booking status
+ * @param companyName company name
  */
-public record BookingResponse(Long id, String clientName, LocalDate date, LocalTime time, String serviceName, BookingStatus status) {
+public record BookingResponse(Long id, String clientName, LocalDate date, LocalTime time, String serviceName, BookingStatus status, String companyName) {
 }
-

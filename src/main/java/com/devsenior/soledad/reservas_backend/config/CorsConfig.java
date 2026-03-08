@@ -7,7 +7,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 /**
  * Global CORS configuration for the application.
  * <p>
- * By default allows requests from http://localhost:3000. Adjust the allowedOrigins
+ * By default allows requests from http://localhost:4200 and http://localhost:3000. Adjust the allowedOrigins
  * if your frontend runs on a different origin.
  */
 @Configuration
@@ -21,11 +21,11 @@ public class CorsConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("http://localhost:4200")
+                .allowedOrigins("http://localhost:4200", "http://localhost:3000")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
+                .exposedHeaders("Authorization")
                 .allowCredentials(true)
                 .maxAge(3600);
     }
 }
-
