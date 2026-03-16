@@ -7,6 +7,7 @@ package com.devsenior.soledad.reservas_backend.dto;
  * @param companyId the id of the company the user belongs to
  * @param username  the authenticated username
  * @param role      the user role
+ * @param slug      the public company slug
  */
-public record AuthResponseDTO(String token, Long companyId, String username, String role) {
+public record AuthResponseDTO(String token, Long companyId, String username, String role, String slug) {
 }

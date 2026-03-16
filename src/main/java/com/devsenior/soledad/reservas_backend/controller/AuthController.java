@@ -18,12 +18,24 @@ public class AuthController {
         this.authService = authService;
     }
 
+    /**
+     * Registers a new company and its administrator user using the public slug provided by the client.
+     *
+     * @param request validated registration payload
+     * @return authentication response for the newly created tenant
+     */
     @PostMapping("/registro")
     public ResponseEntity<AuthResponseDTO> register(@Valid @RequestBody RegisterRequestDTO request) {
         AuthResponseDTO response = authService.register(request);
         return ResponseEntity.status(201).body(response);
     }
 
+    /**
+     * Authenticates an existing user.
+     *
+     * @param request validated login payload
+     * @return authentication response with the issued token
+     */
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDTO> login(@Valid @RequestBody LoginRequestDTO request) {
         AuthResponseDTO response = authService.login(request);

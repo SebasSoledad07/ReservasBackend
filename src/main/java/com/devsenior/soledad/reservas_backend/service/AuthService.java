@@ -18,10 +18,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.Normalizer;
-import java.util.Locale;
-import java.util.regex.Pattern;
-
 @Service
 public class AuthService {
 
@@ -43,26 +39,33 @@ public class AuthService {
         this.authenticationManager = authenticationManager;
     }
 
-    private String generateSlug(String companyName) {
-        String nowhitespace = companyName.trim().replaceAll("\\s+", "-").toLowerCase(Locale.ROOT);
-        String normalized = Normalizer.normalize(nowhitespace, Normalizer.Form.NFD);
-        String slug = Pattern.compile("[^a-z0-9\\-]").matcher(normalized).replaceAll("");
-        // ensure unique by appending numeric suffix if necessary
-        String base = slug;
-        int i = 1;
-        while (companyRepository.findBySlug(slug).isPresent()) {
-            slug = base + "-" + i++;
-        }
-        return slug;
-    }
-
+    /**
+     * Registers a new company and its admin user using the slug provided in the request.
+     *
+     * @param request registration payload
+     * @return authentication response with JWT token and tenant data
+     */
     @Transactional
     public AuthResponseDTO register(RegisterRequestDTO request) {
+        String companyName = request.companyName().trim();
+        String slug = request.slug().trim().toLowerCase();
+
         if (userRepository.existsByUsername(request.username())) {
             throw new BadRequestException("Username is already in use.");
         }
 
-        Company company = Company.builder().name(request.companyName()).slug(generateSlug(request.companyName())).build();
+        if (companyRepository.findByName(companyName).isPresent()) {
+            throw new BadRequestException("Company name is already in use.");
+        }
+
+        if (companyRepository.existsBySlug(slug)) {
+            throw new BadRequestException("Slug is already in use. Please choose a different public link.");
+        }
+
+        Company company = Company.builder()
+                .name(companyName)
+                .slug(slug)
+                .build();
         Company savedCompany = companyRepository.save(company);
 
         AppUser admin = AppUser.builder()
@@ -76,7 +79,13 @@ public class AuthService {
         AppUser savedUser = userRepository.save(admin);
 
         String token = jwtUtil.generateToken(savedUser.getUsername(), savedUser.getId(), savedCompany.getId(), savedUser.getRole().name());
-        return new AuthResponseDTO(token, savedCompany.getId(), savedUser.getUsername(), savedUser.getRole().name());
+        return new AuthResponseDTO(
+                token,
+                savedCompany.getId(),
+                savedUser.getUsername(),
+                savedUser.getRole().name(),
+                savedCompany.getSlug()
+        );
     }
 
     /**
@@ -101,6 +110,12 @@ public class AuthService {
                 user.getCompany().getId(),
                 user.getRole().name()
         );
-        return new AuthResponseDTO(token, user.getCompany().getId(), user.getUsername(), user.getRole().name());
+        return new AuthResponseDTO(
+                token,
+                user.getCompany().getId(),
+                user.getUsername(),
+                user.getRole().name(),
+                user.getCompany().getSlug()
+        );
     }
 }
