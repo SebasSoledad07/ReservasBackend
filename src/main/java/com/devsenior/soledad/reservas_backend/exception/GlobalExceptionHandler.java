@@ -3,6 +3,7 @@ package com.devsenior.soledad.reservas_backend.exception;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -16,6 +17,17 @@ import java.util.Map;
  */
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<Object> handleAuthentication(AuthenticationException ex) {
+        Map<String, Object> body = Map.of(
+                "timestamp", LocalDateTime.now(),
+                "status", HttpStatus.UNAUTHORIZED.value(),
+                "error", "Unauthorized",
+                "message", "Invalid credentials"
+        );
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
+    }
 
     @ExceptionHandler(BookingAlreadyExistsException.class)
     public ResponseEntity<Object> handleBookingAlreadyExists(BookingAlreadyExistsException ex) {

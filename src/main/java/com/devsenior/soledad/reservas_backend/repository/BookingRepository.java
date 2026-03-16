@@ -2,10 +2,13 @@ package com.devsenior.soledad.reservas_backend.repository;
 
 import com.devsenior.soledad.reservas_backend.entity.Booking;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 
 /**
@@ -14,18 +17,25 @@ import java.util.List;
 public interface BookingRepository extends JpaRepository<Booking,Long> {
 
     /**
-     * Checks if a booking exists for the given date and time.
+     * Returns all bookings for a company including company relation to prevent lazy-loading N+1 issues.
      *
-     * @param date the booking date (must not be null)
-     * @param time the booking time (must not be null)
-     * @return true if a booking exists at the given date and time, false otherwise
+     * @param companyId company identifier
+     * @return tenant bookings with company preloaded
      */
-    boolean existsByDateAndTime(LocalDate date, LocalTime time);
+    @Query("select b from Booking b join fetch b.company where b.company.id = :companyId")
+    List<Booking> findAllByCompanyIdWithCompany(@Param("companyId") Long companyId);
 
-    // Multi-tenant methods
-    List<Booking> findByCompany_Id(Long companyId);
+    /**
+     * Returns one booking by id and company including company relation to prevent lazy-loading N+1 issues.
+     *
+     * @param id booking identifier
+     * @param companyId company identifier
+     * @return booking if found in tenant scope
+     */
+    @Query("select b from Booking b join fetch b.company where b.id = :id and b.company.id = :companyId")
+    Optional<Booking> findByIdAndCompanyIdWithCompany(@Param("id") Long id, @Param("companyId") Long companyId);
 
-    boolean existsByCompany_IdAndDateAndTime(Long companyId, LocalDate date, LocalTime time);
+    boolean existsByCompanyIdAndDateAndTime(Long companyId, LocalDate date, LocalTime time);
 
-    java.util.Optional<Booking> findByIdAndCompany_Id(Long id, Long companyId);
+    Optional<Booking> findByIdAndCompany_Id(Long id, Long companyId);
 }

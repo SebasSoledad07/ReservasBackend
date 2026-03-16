@@ -49,7 +49,7 @@ public class BookingService {
      */
     @Transactional
     public BookingResponse createBooking(BookingRequest bookingRequest, Long companyId) {
-        if (bookingRepository.existsByCompany_IdAndDateAndTime(companyId, bookingRequest.date(), bookingRequest.time())) {
+        if (bookingRepository.existsByCompanyIdAndDateAndTime(companyId, bookingRequest.date(), bookingRequest.time())) {
             throw new BookingAlreadyExistsException("A booking already exists for the specified date and time." +
                     " Date: " + bookingRequest.date() + ", Time: " + bookingRequest.time());
         }
@@ -72,7 +72,10 @@ public class BookingService {
      */
     @Transactional(readOnly = true)
     public List<BookingResponse> listAllBookings(Long companyId) {
-        return bookingRepository.findByCompany_Id(companyId).stream().map(bookingMapper::toDto).toList();
+        return bookingRepository.findAllByCompanyIdWithCompany(companyId)
+                .stream()
+                .map(bookingMapper::toDto)
+                .toList();
     }
 
     /**
@@ -88,7 +91,7 @@ public class BookingService {
         if (id == null) {
             throw new IllegalArgumentException("id must not be null");
         }
-        Booking booking = bookingRepository.findByIdAndCompany_Id(id, companyId)
+        Booking booking = bookingRepository.findByIdAndCompanyIdWithCompany(id, companyId)
                 .orElseThrow(() -> new BookingNotFoundException("Booking with id " + id + " not found."));
         return bookingMapper.toDto(booking);
     }
@@ -106,7 +109,7 @@ public class BookingService {
         if (id == null) {
             throw new IllegalArgumentException("id must not be null");
         }
-        Booking booking = bookingRepository.findByIdAndCompany_Id(id, companyId)
+        Booking booking = bookingRepository.findByIdAndCompanyIdWithCompany(id, companyId)
                 .orElseThrow(() -> new BookingNotFoundException("Booking with id " + id + " not found."));
 
         booking.setStatus(BookingStatus.CANCELLED);
@@ -133,7 +136,7 @@ public class BookingService {
         }
 
         // Check for existing booking conflict for that company
-        if (bookingRepository.existsByCompany_IdAndDateAndTime(company.getId(), request.date(), request.time())) {
+        if (bookingRepository.existsByCompanyIdAndDateAndTime(company.getId(), request.date(), request.time())) {
             throw new BookingAlreadyExistsException("A booking already exists for the specified date and time.");
         }
 
